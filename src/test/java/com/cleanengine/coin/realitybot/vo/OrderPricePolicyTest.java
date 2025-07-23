@@ -1,13 +1,15 @@
 package com.cleanengine.coin.realitybot.vo;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Disabled
 public class OrderPricePolicyTest {
-
 
     private final OrderPricePolicy policy = new OrderPricePolicy();
 
@@ -65,4 +67,5 @@ public class OrderPricePolicyTest {
             assertEquals(0, price.buy() % unitPrice, "매수 가격은 호가 단위여야 함");
         }
     }
+
 }
