@@ -6,11 +6,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
 
 public interface SellOrderListRepository extends JpaRepository<SellOrder, Integer> {
     Page<SellOrder> findByUserId(Integer userId, Pageable pageable);
     long countByUserId(Integer userId);
 
     Page<SellOrder> findByUserIdAndState(Integer userId, OrderStatus state, Pageable pageable);
+    Page<SellOrder> findByUserIdAndStateIn(Integer userId, List<OrderStatus> state, Pageable pageable);
     long countByUserIdAndState(Integer userId, OrderStatus state);
+    long countByUserIdAndStateIn(Integer userId, List<OrderStatus> state);
 }

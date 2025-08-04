@@ -35,15 +35,15 @@ public class OrderListService {
         long totalBuyOrders;
         long totalSellOrders;
         if (settled) {
-            buyOrders = buyOrderListRepository.findByUserIdAndState(userId, OrderStatus.DONE,pageRequest).getContent();
-            sellOrders = sellOrderListRepository.findByUserIdAndState(userId,OrderStatus.DONE,pageRequest).getContent();
-            totalBuyOrders = buyOrderListRepository.countByUserIdAndState(userId,OrderStatus.DONE);
-            totalSellOrders = sellOrderListRepository.countByUserIdAndState(userId,OrderStatus.DONE);
+            buyOrders = buyOrderListRepository.findByUserIdAndStateIn(userId,List.of(OrderStatus.DONE,OrderStatus.CANCELED),pageRequest).getContent();
+            sellOrders = sellOrderListRepository.findByUserIdAndStateIn(userId,List.of(OrderStatus.DONE,OrderStatus.CANCELED),pageRequest).getContent();
+            totalBuyOrders = buyOrderListRepository.countByUserIdAndStateIn(userId,List.of(OrderStatus.DONE,OrderStatus.CANCELED));
+            totalSellOrders = sellOrderListRepository.countByUserIdAndStateIn(userId,List.of(OrderStatus.DONE,OrderStatus.CANCELED));
         }else {
-            buyOrders = buyOrderListRepository.findByUserId(userId,pageRequest).getContent();
-            sellOrders = sellOrderListRepository.findByUserId(userId,pageRequest).getContent();
-            totalBuyOrders = buyOrderListRepository.countByUserId(userId);
-            totalSellOrders = sellOrderListRepository.countByUserId(userId);
+            buyOrders = buyOrderListRepository.findByUserIdAndState(userId, OrderStatus.WAIT,pageRequest).getContent();
+            sellOrders = sellOrderListRepository.findByUserIdAndState(userId,OrderStatus.WAIT,pageRequest).getContent();
+            totalBuyOrders = buyOrderListRepository.countByUserIdAndState(userId,OrderStatus.WAIT);
+            totalSellOrders = sellOrderListRepository.countByUserIdAndState(userId,OrderStatus.WAIT);
 
         }
         List<OrderListDto> buyDtos = buyOrders.stream()
