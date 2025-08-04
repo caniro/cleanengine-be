@@ -2,7 +2,7 @@ package com.cleanengine.coin.order.application;
 
 import com.cleanengine.coin.chart.repository.RealTimeTradeRepository;
 import com.cleanengine.coin.order.application.dto.AssetInfo;
-import com.cleanengine.coin.trade.entity.Trade;
+import com.cleanengine.coin.trade.domain.model.Trade;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
