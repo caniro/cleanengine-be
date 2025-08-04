@@ -12,4 +12,6 @@ public interface AssetRepository extends JpaRepository<Asset, String> {
 
     @Query("SELECT a.name FROM Asset a WHERE a.ticker = :ticker")
     String findNameById(String ticker);
+
+    Asset findByTicker(String ticker);
 }

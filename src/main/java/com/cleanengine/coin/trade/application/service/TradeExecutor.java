@@ -76,25 +76,28 @@ public class TradeExecutor {
         tradeService.updateOrder(buyOrder);
         tradeService.updateOrder(sellOrder);
 
-        // 예수금 처리
-        //   - 매도 예수금 처리
-        this.increaseAccountCash(sellOrder, totalTradedPrice);
-
-        //   - 매수 잔여금액 반환
-        if (!isMarketOrder(buyOrder) && buyOrder.getPrice() > tradedPrice) {  // 매도 호가보다 높은 가격에 매수를 시도한 경우, 차액 반환
-            log.debug("[{}] 매도 호가보다 높은 가격에 매수를 시도한 경우, 차액 반환", Thread.currentThread().threadId());
-            double totalRefundAmount = (buyOrder.getPrice() - tradedPrice) * tradedSize;
-            this.increaseAccountCash(buyOrder, totalRefundAmount);
-        }
-
-        // 지갑 누적계산
-        walletService.updateWalletAfterTrade(buyOrder, ticker, tradedSize, totalTradedPrice);
-
         // 체결내역 저장
         Trade trade = Trade.of(ticker, LocalDateTime.now(), buyOrder.getUserId(), sellOrder.getUserId(), tradedPrice, tradedSize);
 
         TradeExecutedEvent tradeExecutedEvent = TradeExecutedEvent.of(trade, buyOrder.getId(), sellOrder.getId());
         tradeExecutedEventPublisher.publish(tradeExecutedEvent);
+
+        if (buyOrder.getIsBot() == false || sellOrder.getIsBot() == false) {
+            // 지갑 누적계산
+            walletService.updateWalletAfterTrade(buyOrder.getUserId(), ticker, tradedPrice, tradedSize);
+
+            // 예수금 처리
+            //   - 매도 예수금 처리
+            this.increaseAccountCash(sellOrder, totalTradedPrice);
+
+            //   - 매수 잔여금액 반환
+            if (!isMarketOrder(buyOrder) && buyOrder.getPrice() > tradedPrice) {
+                double totalRefundAmount = (buyOrder.getPrice() - tradedPrice) * tradedSize;
+                this.increaseAccountCash(buyOrder, totalRefundAmount);
+                log.debug("[{}] 유저 {} 의 차액 반환 : {}원 (매도 호가보다 높은 가격에 매수를 시도)", Thread.currentThread().threadId(), buyOrder.getUserId(), totalRefundAmount);
+            }
+        }
+
         return trade;
     }
 

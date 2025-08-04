@@ -37,7 +37,10 @@ public class UserService {
         // 총 자산 계산 (현금 + (각 코인 보유량 * 현재가))
         double totalWalletValue = wallets.stream()
                 .mapToDouble(wallet ->
-                        wallet.getSize() * assetService.getCurrentPrice(wallet.getTicker()))
+                {
+                    Double currentPrice = assetService.getCurrentPrice(wallet.getTicker());
+                    return currentPrice == null ? 0.0 : wallet.getSize() * currentPrice;
+                })
                 .sum();
         double totalCash = account.getCash() + totalWalletValue;
 
@@ -47,6 +50,7 @@ public class UserService {
 
     private List<UserWalletDTO> convertToDTO(List<Wallet> wallets) {
         return wallets.stream()
+                .filter(w -> w.getSize() > 0.0)
                 .map(w -> {
                     Double currentPrice = assetService.getCurrentPrice(w.getTicker());
                     Double roi;

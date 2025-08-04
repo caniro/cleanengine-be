@@ -1,5 +1,6 @@
 package com.cleanengine.coin.order.application;
 
+import com.cleanengine.coin.chart.repository.RealTimeTradeRepository;
 import com.cleanengine.coin.common.error.DomainValidationException;
 import com.cleanengine.coin.order.adapter.out.persistentce.asset.AssetCacheRepository;
 import com.cleanengine.coin.order.adapter.out.persistentce.asset.AssetRepository;
@@ -11,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.FieldError;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,6 +24,7 @@ public class AssetService {
     private final AssetRepository assetRepository;
     private final AssetCacheRepository assetCacheRepository;
     private final TradeQueryUseCase tradeQueryUseCase;
+    private final RealTimeTradeRepository realTimeTradeRepository;
 
     private final ConcurrentHashMap<String, Double> currentPriceCache = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Asset> assetCache = new ConcurrentHashMap<>();
@@ -41,18 +45,30 @@ public class AssetService {
     }
 
     public AssetInfo getAssetInfo(String ticker){
-        Optional<Asset> assetOpt = getAsset(ticker);
-        if(assetOpt.isEmpty()){
-           throw new DomainValidationException(
-                   String.format("Asset %s not found", ticker),
-                   List.of(new FieldError("Asset", "ticker", "Asset not found")));
+        Asset asset = this.getAsset(ticker).orElseThrow(() -> new DomainValidationException(
+                String.format("Asset %s not found", ticker),
+                List.of(new FieldError("Asset", "ticker", "Asset not found"))));
+
+        Double currentPrice = this.getCurrentPrice(ticker);
+        Double changeRate = null;
+        if (currentPrice != null) {
+            changeRate = getChangeRate(ticker, currentPrice);
         }
 
-        return AssetInfo.from(assetOpt.get());
+        return AssetInfo.from(asset, currentPrice, changeRate);
+    }
+
+    private Double getChangeRate(String ticker, Double currentPrice) {
+        LocalDateTime yesterday = LocalDate.now().minusDays(1).atStartOfDay();
+        LocalDateTime today = LocalDate.now().atStartOfDay().minusNanos(1);
+        Trade prevTrade = realTimeTradeRepository.findFirstByTickerAndTradeTimeBetweenOrderByTradeTimeDesc(ticker, yesterday, today);
+        if (prevTrade == null) { return null; }
+
+        return (currentPrice - prevTrade.getPrice()) / prevTrade.getPrice() * 100;
     }
 
     public List<AssetInfo> getAllAssetInfos(){
-        return assetRepository.findAll().stream().map(AssetInfo::from).toList();
+        return assetRepository.findAll().stream().map(asset -> getAssetInfo(asset.getTicker())).toList();
     }
 
     public List<String> getAllTickers() {

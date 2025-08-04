@@ -25,7 +25,7 @@ public class AssetControllerTest extends ControllerTest {
     @WithCustomMockUser
     public void findAll() throws Exception {
         when(assetService.getAllAssetInfos())
-                .thenReturn(List.of(new AssetInfo("BTC", "비트코인", null)));
+                .thenReturn(List.of(new AssetInfo("BTC", "비트코인", null, null, null)));
 
         String responseStr = performGet("/api/asset")
                 .andExpect(status().isOk())
@@ -41,7 +41,7 @@ public class AssetControllerTest extends ControllerTest {
     @WithCustomMockUser
     public void findAsset() throws Exception {
         when(assetService.getAssetInfo("BTC"))
-                .thenReturn(new AssetInfo("BTC", "비트코인", null));
+                .thenReturn(new AssetInfo("BTC", "비트코인", null, null, null));
 
         String responseStr = performGet("/api/asset/BTC")
                 .andExpect(status().isOk())

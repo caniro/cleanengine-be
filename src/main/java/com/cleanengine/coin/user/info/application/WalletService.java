@@ -1,7 +1,6 @@
 package com.cleanengine.coin.user.info.application;
 
 import com.cleanengine.coin.order.adapter.out.persistentce.asset.AssetRepository;
-import com.cleanengine.coin.order.domain.BuyOrder;
 import com.cleanengine.coin.user.domain.QAccount;
 import com.cleanengine.coin.user.domain.QWallet;
 import com.cleanengine.coin.user.domain.Wallet;
@@ -25,12 +24,15 @@ public class WalletService {
 
     private final JPAQueryFactory queryFactory;
 
+    private final EntityManager entityManager;
+
     public WalletService(WalletRepository walletRepository, AccountRepository accountRepository,
-                         AssetRepository assetRepository, EntityManager entityManager) {
+                         AssetRepository assetRepository, EntityManager entityManager, EntityManager entityManager1) {
         this.walletRepository = walletRepository;
         this.accountRepository = accountRepository;
         this.assetRepository = assetRepository;
         this.queryFactory = new JPAQueryFactory(entityManager);
+        this.entityManager = entityManager1;
     }
 
     @Transactional
@@ -62,26 +64,31 @@ public class WalletService {
     }
 
     @Transactional
-    public void updateWalletAfterTrade(BuyOrder buyOrder, String ticker, double tradedSize, double totalTradedPrice) {
+    public void updateWalletAfterTrade(int buyUserId, String ticker, double tradedPrice, double tradedSize) {
         QWallet wallet = QWallet.wallet;
         QAccount account = QAccount.account;
 
-        queryFactory
+        long executedCount = queryFactory
                 .update(wallet)
                 .where(wallet.accountId.eq(
                         queryFactory
                                 .select(account.id)
                                 .from(account)
-                                .where(account.userId.eq(buyOrder.getUserId()))
+                                .where(account.userId.eq(buyUserId))
                 ).and(wallet.ticker.eq(ticker)))
-                .set(wallet.size, wallet.size.add(tradedSize))
                 .set(wallet.buyPrice,
                         wallet.buyPrice.coalesce(0.0)
                                 .multiply(wallet.size)
-                                .add(totalTradedPrice)
+                                .add(tradedPrice * tradedSize)
                                 .divide(wallet.size.add(tradedSize))
                 )
+                .set(wallet.size, wallet.size.coalesce(0.0).add(tradedSize))
                 .execute();
+
+        if (executedCount > 0) {
+            entityManager.flush();
+            entityManager.clear();
+        }
     }
 
 }

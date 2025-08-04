@@ -34,12 +34,14 @@ class WalletServiceTest {
 
     private Account testAccount;
 
+    private int buyUserId;
+
     @BeforeEach
     void setUp() {
         // given
-        int userId = 3;
-        testAccount = Account.of(userId, 0.0);
-        accountRepository.findById(userId).ifPresent(accountRepository::delete);
+        buyUserId = 3;
+        testAccount = Account.of(buyUserId, 0.0);
+        accountRepository.findById(buyUserId).ifPresent(accountRepository::delete);
         accountRepository.save(testAccount);
         walletRepository.deleteAll(walletRepository.findByAccountId(testAccount.getId()));
 
@@ -49,7 +51,7 @@ class WalletServiceTest {
 
     @AfterEach
     void tearDown() {
-        accountRepository.findById(testAccount.getUserId()).ifPresent(accountRepository::delete);
+        accountRepository.findById(buyUserId).ifPresent(accountRepository::delete);
         walletRepository.deleteAll(walletRepository.findByAccountId(testAccount.getId()));
     }
 
@@ -81,7 +83,7 @@ class WalletServiceTest {
     @Test
     void findWalletByUserIdAndTicker_ExistingWallet_thenReturnWallet() {
         // when
-        Wallet wallet = walletService.findWalletByUserIdAndTicker(testAccount.getUserId(), "BTC");
+        Wallet wallet = walletService.findWalletByUserIdAndTicker(buyUserId, "BTC");
 
         // then
         assertThat(wallet).isNotNull();
@@ -94,12 +96,123 @@ class WalletServiceTest {
     @Test
     void findWalletByUserIdAndTicker_NonExistingWallet_thenReturnEmptyWallet() {
         // when
-        Wallet wallet = walletService.findWalletByUserIdAndTicker(testAccount.getUserId(), "TRUMP");
+        Wallet wallet = walletService.findWalletByUserIdAndTicker(buyUserId, "TRUMP");
 
         // then
         assertThat(wallet).isNotNull();
         assertThat(wallet.getTicker()).isEqualTo("TRUMP");
         assertThat(wallet.getSize()).isEqualTo(0.0);
+    }
+
+    @DisplayName("빈 지갑에 신규 거래가 발생되어 지갑이 정상 업데이트된다.")
+    @Test
+    void updateWalletAfterTrade_EmptyWalletNewTrade_thenReturnWallet() {
+        // given
+        Wallet wallet = walletService.findWalletByUserIdAndTicker(buyUserId, "BTC");
+        wallet.reset(0);
+        double tradedPrice = 160_000_000.0;
+        double tradedSize = 100.0;
+
+        // when
+        walletService.updateWalletAfterTrade(buyUserId, "BTC", tradedPrice, tradedSize);
+
+        // then
+        Wallet walletAfter = walletService.findWalletByUserIdAndTicker(buyUserId, "BTC");
+
+        assertThat(walletAfter.getBuyPrice()).isEqualTo(tradedPrice);
+        assertThat(walletAfter.getSize()).isEqualTo(tradedSize);
+    }
+
+    @DisplayName("지갑에 신규 거래(동일 가격, 동일 수량)가 발생되어 지갑이 정상 업데이트된다.")
+    @Test
+    void updateWalletAfterTrade_SamePriceSameSizeNewTrade_thenReturnWallet() {
+        // given
+        Wallet wallet = walletService.findWalletByUserIdAndTicker(buyUserId, "BTC");
+        wallet.reset(0);
+        double initialPrice = 160_000_000.0;
+        double initialSize = 100.0;
+        walletService.updateWalletAfterTrade(buyUserId, "BTC", initialPrice, initialSize);
+
+        // when
+        double tradedPrice = initialPrice;
+        double tradedSize = initialSize;
+        walletService.updateWalletAfterTrade(buyUserId, "BTC", tradedPrice, tradedSize);
+
+        // then
+        Wallet walletAfter = walletService.findWalletByUserIdAndTicker(buyUserId, "BTC");
+
+        double priceAfter = (initialPrice * initialSize + tradedPrice * tradedSize) / (initialSize + tradedSize);
+        assertThat(walletAfter.getBuyPrice()).isEqualTo(priceAfter);
+        assertThat(walletAfter.getSize()).isEqualTo(initialSize + tradedSize);
+    }
+
+    @DisplayName("지갑에 신규 거래(동일 가격)가 발생되어 지갑이 정상 업데이트된다.")
+    @Test
+    void updateWalletAfterTrade_SamePriceNewTrade_thenReturnWallet() {
+        // given
+        Wallet wallet = walletService.findWalletByUserIdAndTicker(buyUserId, "BTC");
+        wallet.reset(0);
+        double initialPrice = 160_000_000.0;
+        double initialSize = 100.0;
+        walletService.updateWalletAfterTrade(buyUserId, "BTC", initialPrice, initialSize);
+
+        // when
+        double tradedPrice = initialPrice;
+        double tradedSize = 50.0;
+        walletService.updateWalletAfterTrade(buyUserId, "BTC", tradedPrice, tradedSize);
+
+        // then
+        Wallet walletAfter = walletService.findWalletByUserIdAndTicker(buyUserId, "BTC");
+
+        double priceAfter = (initialPrice * initialSize + tradedPrice * tradedSize) / (initialSize + tradedSize);
+        assertThat(walletAfter.getBuyPrice()).isEqualTo(priceAfter);
+        assertThat(walletAfter.getSize()).isEqualTo(initialSize + tradedSize);
+    }
+
+    @DisplayName("지갑에 신규 거래(동일 수량)가 발생되어 지갑이 정상 업데이트된다.")
+    @Test
+    void updateWalletAfterTrade_SameSizeNewTrade_thenReturnWallet() {
+        // given
+        Wallet wallet = walletService.findWalletByUserIdAndTicker(buyUserId, "BTC");
+        wallet.reset(0);
+        double initialPrice = 150_000_000.0;
+        double initialSize = 100.0;
+        walletService.updateWalletAfterTrade(buyUserId, "BTC", initialPrice, initialSize);
+
+        // when
+        double tradedPrice = 160_000_000.0;
+        double tradedSize = initialSize;
+        walletService.updateWalletAfterTrade(buyUserId, "BTC", tradedPrice, tradedSize);
+
+        // then
+        Wallet walletAfter = walletService.findWalletByUserIdAndTicker(buyUserId, "BTC");
+
+        double priceAfter = (initialPrice * initialSize + tradedPrice * tradedSize) / (initialSize + tradedSize);
+        assertThat(walletAfter.getBuyPrice()).isEqualTo(priceAfter);
+        assertThat(walletAfter.getSize()).isEqualTo(initialSize + tradedSize);
+    }
+
+    @DisplayName("지갑에 신규 거래가 발생되어 지갑이 정상 업데이트된다.")
+    @Test
+    void updateWalletAfterTrade_NewTrade_thenReturnWallet() {
+        // given
+        Wallet wallet = walletService.findWalletByUserIdAndTicker(buyUserId, "BTC");
+        wallet.reset(0);
+        double initialPrice = 150_000_000.0;
+        double initialSize = 100.0;
+        walletService.updateWalletAfterTrade(buyUserId, "BTC", initialPrice, initialSize);
+
+        // when
+        double tradedPrice = 160_000_000.0;
+        double tradedSize = 50.0;
+        walletService.updateWalletAfterTrade(buyUserId, "BTC", tradedPrice, tradedSize);
+
+        // then
+        Wallet walletAfter = walletService.findWalletByUserIdAndTicker(buyUserId, "BTC");
+
+        double priceAfter = (initialPrice * initialSize + tradedPrice * tradedSize) / (initialSize + tradedSize);
+        assertThat(walletAfter.getBuyPrice()).isEqualTo(priceAfter);
+        assertThat(walletAfter.getSize()).isEqualTo(initialSize + tradedSize);
     }
 
 }

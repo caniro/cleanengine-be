@@ -4,6 +4,7 @@ import com.cleanengine.coin.common.response.ApiResponse;
 import com.cleanengine.coin.order.application.dto.AssetInfo;
 import com.cleanengine.coin.order.application.AssetService;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,7 @@ public class AssetController {
         return ApiResponse.success(assetService.getAssetInfo(ticker), HttpStatus.OK).toResponseEntity();
     }
 
+    @Operation(summary = "모든 종목 정보를 불러옵니다.")
     @GetMapping("/api/asset")
     public ResponseEntity<ApiResponse<AssetInfos>> getAllAsset() {
         List<AssetInfo> assetInfoList = assetService.getAllAssetInfos();

@@ -1,5 +1,8 @@
 package com.cleanengine.coin.user.info.presentation;
 
+import com.cleanengine.coin.user.info.application.DecimalPlaces2Serializer;
+import com.cleanengine.coin.user.info.application.DecimalPlaces8Serializer;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,15 +20,19 @@ public class UserWalletDTO {
     private final Integer accountId;
 
     @Schema(description = "보유수량", example = "2.5")
+    @JsonSerialize(using = DecimalPlaces8Serializer.class)
     private final Double size;
 
     @Schema(description = "1주 평균 매수 금액", example = "15000")
+    @JsonSerialize(using = DecimalPlaces8Serializer.class)
     private final Double buyPrice;  // 매수 평단
 
     @Schema(description = "수익률", example = "10")
+    @JsonSerialize(using = DecimalPlaces2Serializer.class)
     private final Double roi;  // 수익률
 
     @Schema(description = "현재가(최근 체결가)", example = "16500")
+    @JsonSerialize(using = DecimalPlaces8Serializer.class)
     private final Double currentPrice;  // 현재가(최근 체결가)
 
     @Builder

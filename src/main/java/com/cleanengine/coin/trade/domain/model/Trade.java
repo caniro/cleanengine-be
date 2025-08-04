@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -25,8 +24,7 @@ public class Trade {
     @Column(name = "ticker", nullable = false)
     private String ticker;
 
-    @Column(name = "trade_time", nullable = false)
-    @CreationTimestamp
+    @Column(name = "trade_time", nullable = false, updatable = false)
     private LocalDateTime tradeTime;
 
     @Column(name = "buy_user_id", nullable = false)

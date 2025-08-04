@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -16,7 +15,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-//@WorkingServerProfile
 @RequiredArgsConstructor
 @Slf4j
 public class ChartDataController {
@@ -32,7 +30,7 @@ public class ChartDataController {
     /**
      * 1초마다 실행 - 실시간 OHLC 데이터 전송
      */
-    @Scheduled(fixedRate = 1000)
+//    @Scheduled(fixedRate = 1000)
     public void publishRealTimeOhlc() {
         try {
             log.debug("△ 실시간 OHLC 데이터 스케줄러 실행");
