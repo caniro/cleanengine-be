@@ -1,4 +1,4 @@
-package com.cleanengine.coin.trade.application;
+package com.cleanengine.coin.trade.application.service;
 
 import com.cleanengine.coin.order.adapter.out.persistentce.order.command.BuyOrderRepository;
 import com.cleanengine.coin.order.adapter.out.persistentce.order.command.SellOrderRepository;
@@ -35,10 +35,13 @@ class TradeFlowServiceIntegrationTest {
 
     @Autowired
     BuyOrderRepository buyOrderRepository;
+
     @Autowired
     SellOrderRepository sellOrderRepository;
+
     @Autowired
     TradeQueryUseCase tradeQueryUseCase;
+
     @Autowired
     JpaTradeCommandRepository jpaTradeCommandRepository;
 
@@ -46,6 +49,7 @@ class TradeFlowServiceIntegrationTest {
     private WaitingOrdersManager waitingOrdersManager;
 
     private final String ticker = "BTC";
+
     private final WaitingOrders waitingOrders = waitingOrdersManager.getWaitingOrders(ticker);
 
     @BeforeEach

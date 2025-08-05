@@ -1,6 +1,5 @@
-package com.cleanengine.coin.trade.application;
+package com.cleanengine.coin.trade.adapter.out.event;
 
-import com.cleanengine.coin.trade.adapter.out.event.SpringTradeExecutedEventPublisher;
 import com.cleanengine.coin.trade.domain.event.TradeExecutedEvent;
 import com.cleanengine.coin.trade.domain.model.Trade;
 import org.junit.jupiter.api.DisplayName;

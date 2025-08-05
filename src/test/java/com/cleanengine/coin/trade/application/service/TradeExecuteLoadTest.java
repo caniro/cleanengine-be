@@ -1,4 +1,4 @@
-package com.cleanengine.coin.trade.application;
+package com.cleanengine.coin.trade.application.service;
 
 import com.cleanengine.coin.common.domain.port.PriorityQueueStore;
 import com.cleanengine.coin.order.adapter.out.persistentce.order.command.BuyOrderRepository;
@@ -11,7 +11,6 @@ import com.cleanengine.coin.order.domain.spi.WaitingOrders;
 import com.cleanengine.coin.order.domain.spi.WaitingOrdersManager;
 import com.cleanengine.coin.trade.application.port.out.TradeCommandRepository;
 import com.cleanengine.coin.trade.application.port.out.TradeQueryRepository;
-import com.cleanengine.coin.trade.application.service.TradeFlowService;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -1,9 +1,8 @@
-package com.cleanengine.coin.trade.application;
+package com.cleanengine.coin.trade.domain.model;
 
 import com.cleanengine.coin.order.domain.BuyOrder;
 import com.cleanengine.coin.order.domain.Order;
 import com.cleanengine.coin.order.domain.SellOrder;
-import com.cleanengine.coin.trade.domain.model.TradePair;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

@@ -20,7 +20,7 @@ public class TradeMatcher {
 
     private static final long LOG_INTERVAL = 1000;
 
-    public Optional<TradePair<Order, Order>> matchOrders(WaitingOrders waitingOrders) {  // 반환값 : 체결여부
+    public Optional<TradePair<Order, Order>> matchOrders(WaitingOrders waitingOrders) {
         this.writeQueueLog(waitingOrders);
 
         TradePair<Order, Order> targetTradePair;
@@ -41,6 +41,7 @@ public class TradeMatcher {
             // 3. 지정가 주문
             targetTradePair = this.matchBetweenLimitOrders(limitBuyOrder, limitSellOrder);
         }
+
         return Optional.ofNullable(targetTradePair);
     }
 
@@ -60,7 +61,7 @@ public class TradeMatcher {
 
     private void writeQueueLog(WaitingOrders waitingOrders) {
         long currentTime = System.currentTimeMillis();
-        if (currentTime - lastLogTime > LOG_INTERVAL) {
+        if (currentTime - lastLogTime > LOG_INTERVAL && log.isDebugEnabled()) {
             log.debug("주문 큐 - 시장가매도[{}], 지정가매도[{}], 시장가매수[{}], 지정가매수[{}]",
                     waitingOrders.getSellOrderPriorityQueueStore(OrderType.MARKET).size(),
                     waitingOrders.getSellOrderPriorityQueueStore(OrderType.LIMIT).size(),

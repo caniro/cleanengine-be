@@ -1,8 +1,7 @@
-package com.cleanengine.coin.trade.application;
+package com.cleanengine.coin.trade.adapter.in.event;
 
 import com.cleanengine.coin.order.domain.BuyOrder;
 import com.cleanengine.coin.order.domain.SellOrder;
-import com.cleanengine.coin.trade.adapter.in.event.TradeExecutedNotificationHandler;
 import com.cleanengine.coin.trade.application.dto.TradeOrderCompletedNotifyDto;
 import com.cleanengine.coin.trade.domain.event.TradeOrderCompletedEvent;
 import org.junit.jupiter.api.BeforeEach;
